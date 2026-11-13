@@ -144,17 +144,41 @@ function parseDate(
     }
   }
 
-  const values: Partial<Record<DateField, string>> = {}
+  const dateOf = (values: Partial<Record<DateField, string>>) => {
+    const offset = yearOffset(locale)
+    const year =
+      values.year === undefined
+        ? referenceYear
+        : fullYear(values.year, referenceYear + offset) - offset
+    return isoDate(year, Number(values.month), Number(values.day))
+  }
+
   if (namedMonth !== undefined) {
-    const rest = fields.filter((field) => field !== "month")
     if (numbers.length > 2 || numbers.length === 0) {
       return undefined
     }
+    const read = (order: DateField[]) =>
+      dateOf({
+        ...Object.fromEntries(
+          order.map((field, index) => [field, numbers[index]])
+        ),
+        month: String(namedMonth),
+      })
     // With one number beside the name, it's the day: "October 16".
-    const order = numbers.length === 1 ? ["day" as const] : rest
-    order.forEach((field, index) => (values[field] = numbers[index]))
-    values.month = String(namedMonth)
-  } else if (numbers.length === 1) {
+    if (numbers.length === 1) {
+      return read(["day"])
+    }
+    // A locale can write the day and the year one way beside a name and the
+    // other way in numbers, like Canada's "Oct 16, 2026" and "2026-10-16".
+    // Both read, the named order first.
+    return (
+      read(namedOrder(locale)) ??
+      read(fields.filter((field) => field !== "month"))
+    )
+  }
+
+  const values: Partial<Record<DateField, string>> = {}
+  if (numbers.length === 1) {
     const digits = numbers[0]!
     if (digits.length !== 8 && digits.length !== 6) {
       return undefined
@@ -173,12 +197,19 @@ function parseDate(
     return undefined
   }
 
-  const offset = yearOffset(locale)
-  const year =
-    values.year === undefined
-      ? referenceYear
-      : fullYear(values.year, referenceYear + offset) - offset
-  return isoDate(year, Number(values.month), Number(values.day))
+  return dateOf(values)
+}
+
+function namedOrder(locale: string | undefined) {
+  return dateFormatter(locale, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  })
+    .formatToParts(0)
+    .flatMap((part) =>
+      part.type === "year" || part.type === "day" ? [part.type] : []
+    )
 }
 
 const yearOffsets = new Map<string, number>()

@@ -193,6 +193,15 @@ describe("datePicker", () => {
     expect(picker.instance.get().month).toBe("2026-12")
   })
 
+  test("Canadian English reads a month name with its year", async () => {
+    const picker = mount({}, { lang: "en-CA" })
+    await tick()
+    await picker.type("Oct 16, 2026")
+    expect(picker.instance.get().value).toBe("2026-10-16")
+    expect(picker.input().value).toBe("2026-10-16")
+    expect(picker.input().hasAttribute("aria-invalid")).toBe(false)
+  })
+
   test("German reads day first", async () => {
     const picker = mount({}, { lang: "de" })
     await tick()

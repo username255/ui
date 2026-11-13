@@ -367,6 +367,15 @@ describe("typing a date", () => {
     )
   })
 
+  test("beside a month name, the day and the year read in the order the locale writes them there", () => {
+    expect(parseDate("Oct 16, 2026", "en-CA")).toBe("2026-10-16")
+    expect(parseDate("16 oktober 2026", "sv-SE")).toBe("2026-10-16")
+    expect(
+      parseDate("Oct 16, 26", "en-CA", { referenceDate: "2026-01-01" })
+    ).toBe("2026-10-16")
+    expect(parseDate("2026 okt 16", "sv-SE")).toBe("2026-10-16")
+  })
+
   test("reads a pasted label with its weekday", () => {
     expect(parseDate("Friday, October 16, 2026", "en-US")).toBe("2026-10-16")
   })
