@@ -173,6 +173,28 @@ describe("parsing", () => {
     ).toBe(5)
   })
 
+  test("reads a long unit or currency name beside any whole number", () => {
+    const liters = {
+      style: "unit",
+      unit: "liter",
+      unitDisplay: "long",
+    } as const
+    const hryvnias = {
+      style: "currency",
+      currency: "UAH",
+      currencyDisplay: "name",
+      maximumFractionDigits: 0,
+    } as const
+    expect(parseNumber("5 літрів", "uk-UA", liters)).toBe(5)
+    expect(parseNumber("2 українські гривні", "uk-UA", hryvnias)).toBe(2)
+    for (const locale of ["uk-UA", "pl-PL", "cs-CZ", "cy", "br"]) {
+      for (const value of [0, 1, 2, 3, 5, 6, 1e6]) {
+        const shown = formatNumber(value, locale, liters)
+        expect(parseNumber(shown, locale, liters), shown).toBe(value)
+      }
+    }
+  })
+
   test("accepts what could still become a number", () => {
     expect(isPartialNumber("-", "en-US", undefined)).toBe(true)
     expect(isPartialNumber("1.", "en-US", undefined)).toBe(true)

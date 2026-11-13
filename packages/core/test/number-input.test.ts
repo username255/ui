@@ -106,6 +106,20 @@ describe("number input", () => {
     expect(attrs(instance.part("control")).value).toBe("$19.99")
   })
 
+  test("a number typed beside a long unit name is read, whatever the name's plural form", () => {
+    const instance = numberInput({
+      id: "n",
+      defaultValue: 5,
+      locale: "uk-UA",
+      format: { style: "unit", unit: "liter", unitDisplay: "long" },
+    })
+    expect(attrs(instance.part("control")).value).toBe("5 літрів")
+    instance.api.internal.type("7 літрів")
+    instance.api.internal.commitText()
+    expect(instance.get().value).toBe(7)
+    expect(attrs(instance.part("control")).value).toBe("7 літрів")
+  })
+
   test("typing follows the value only while it's a number within the bounds", () => {
     const onValueChange = vi.fn()
     const instance = numberInput({

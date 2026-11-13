@@ -34,12 +34,10 @@ function symbolsOf(
     return cached
   }
   const formatter = numberFormatter(locale, options)
-  const parts = [
-    ...formatter.formatToParts(-12345.6),
-    ...formatter.formatToParts(12345.6),
-    // Long currency names differ between one and many.
-    ...formatter.formatToParts(1),
-  ]
+  // Long unit and currency names differ by count: 1 літр, 2 літри, 5 літрів.
+  const parts = [-12345.6, 12345.6, 0, 1, 2, 3, 5, 6, 7, 11, 100, 1e6].flatMap(
+    (sample) => formatter.formatToParts(sample)
+  )
   const find = (type: string) => parts.find((part) => part.type === type)?.value
   // Formats that show no decimals or no grouping, like percents, yen or
   // `useGrouping: false`, still read the locale's own separators.
