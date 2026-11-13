@@ -152,6 +152,14 @@ describe("converting", () => {
     ).toBe("#7654cd")
   })
 
+  test("wraps a hue below 0 around the wheel", () => {
+    for (const space of ["hsl", "hsv", "hwb"] satisfies ColorSpace[]) {
+      const srgbAt = (hue: number) =>
+        convertColor({ space, coords: [hue, 40, 40], alpha: 1 }, "srgb").coords
+      expectCoords(srgbAt(-90), srgbAt(270))
+    }
+  })
+
   test("round-trips through every space", () => {
     const spaces: ColorSpace[] = [
       "srgb-linear",

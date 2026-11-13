@@ -168,8 +168,9 @@ function srgbToHsl(rgb: Coords) {
 function hslToSrgb([hue, saturation, lightness]: Coords) {
   const s = saturation / 100
   const l = lightness / 100
+  const h = normalizeHue(hue)
   const channel = (n: number) => {
-    const k = (n + hue / 30) % 12
+    const k = (n + h / 30) % 12
     return l - s * Math.min(l, 1 - l) * Math.max(-1, Math.min(k - 3, 9 - k, 1))
   }
   return [channel(0), channel(8), channel(4)] satisfies Coords
@@ -189,8 +190,9 @@ function srgbToHsv(rgb: Coords) {
 function hsvToSrgb([hue, saturation, value]: Coords) {
   const s = saturation / 100
   const v = value / 100
+  const h = normalizeHue(hue)
   const channel = (n: number) => {
-    const k = (n + hue / 60) % 6
+    const k = (n + h / 60) % 6
     return v - v * s * Math.max(0, Math.min(k, 4 - k, 1))
   }
   return [channel(5), channel(3), channel(1)] satisfies Coords
